@@ -1,0 +1,51 @@
+name: Deploy to Heroku
+
+on:
+  workflow_dispatch:   # manual only, so it doesn't run on every push alongside the EC2 deploy
+
+jobs:
+  deploy-user-service:
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v4
+    - uses: akhileshns/heroku-deploy@v3.12.12
+      with:
+        heroku_api_key: ${{secrets.HEROKU_API_KEY}}
+        heroku_app_name: "your-username-user-service"
+        heroku_email: "your-email@example.com"
+        appdir: "user-service"
+
+  deploy-product-service:
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v4
+    - uses: akhileshns/heroku-deploy@v3.12.12
+      with:
+        heroku_api_key: ${{secrets.HEROKU_API_KEY}}
+        heroku_app_name: "your-username-product-service"
+        heroku_email: "your-email@example.com"
+        appdir: "product-service"
+
+  deploy-order-service:
+    runs-on: ubuntu-latest
+    needs: [deploy-user-service, deploy-product-service]
+    steps:
+    - uses: actions/checkout@v4
+    - uses: akhileshns/heroku-deploy@v3.12.12
+      with:
+        heroku_api_key: ${{secrets.HEROKU_API_KEY}}
+        heroku_app_name: "your-username-order-service"
+        heroku_email: "your-email@example.com"
+        appdir: "order-service"
+
+  deploy-api-gateway:
+    runs-on: ubuntu-latest
+    needs: [deploy-user-service, deploy-product-service, deploy-order-service]
+    steps:
+    - uses: actions/checkout@v4
+    - uses: akhileshns/heroku-deploy@v3.12.12
+      with:
+        heroku_api_key: ${{secrets.HEROKU_API_KEY}}
+        heroku_app_name: "your-username-api-gateway"
+        heroku_email: "your-email@example.com"
+        appdir: "api-gateway"
